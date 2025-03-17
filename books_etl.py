@@ -15,6 +15,14 @@ from unstructured_ingest.v2.processes.connectors.mongodb import (
     MongoDBAccessConfig
 )
 
+# For LanceDB OSS with local data storage:
+from unstructured_ingest.v2.processes.connectors.lancedb.local import (
+     LanceDBLocalConnectionConfig,
+     LanceDBLocalAccessConfig,
+     LanceDBUploadStagerConfig,
+     LanceDBUploaderConfig
+ )
+
 from unstructured_ingest.v2.processes.partitioner import PartitionerConfig
 from unstructured_ingest.v2.processes.chunker import ChunkerConfig
 from unstructured_ingest.v2.processes.embedder import EmbedderConfig
@@ -36,8 +44,8 @@ if __name__ == "__main__":
 
         partitioner_config=PartitionerConfig(
             partition_by_api=True,
-            api_key=os.getenv("UNSTRUCTURED_API_KEY"),
-            partition_endpoint=os.getenv("UNSTRUCTURED_URL"),
+            #api_key=os.getenv("UNSTRUCTURED_API_KEY"),
+            #partition_endpoint=os.getenv("UNSTRUCTURED_URL"),
             strategy="fast"
         ),
 
@@ -53,11 +61,20 @@ if __name__ == "__main__":
             embedding_model_name=os.getenv("EMBEDDING_MODEL"),
         ),
 
-        destination_connection_config=MongoDBConnectionConfig(
-            access_config=MongoDBAccessConfig(uri=os.getenv("MONGODB_URI")),
-            collection="unstructured-demo",
-            database="books",
-        ),
-        stager_config=MongoDBUploadStagerConfig(),
-        uploader_config=MongoDBUploaderConfig(batch_size=10)
+       # For MongoDB:  
+       # destination_connection_config=MongoDBConnectionConfig(
+       #     access_config=MongoDBAccessConfig(uri=os.getenv("MONGODB_URI")),
+       #     collection="unstructured-demo",
+       #     database="books",
+       # ),
+       # stager_config=MongoDBUploadStagerConfig(),
+       # uploader_config=MongoDBUploaderConfig(batch_size=10)
+
+        # For LanceDB OSS with local data storage:
+        destination_connection_config=LanceDBLocalConnectionConfig(
+             access_config=LanceDBLocalAccessConfig(),
+             uri=os.getenv("LANCEDB_URI")
+         ),
+        stager_config=LanceDBUploadStagerConfig(),
+        uploader_config=LanceDBUploaderConfig(table_name=os.getenv("LANCEDB_TABLE"))
     ).run()
